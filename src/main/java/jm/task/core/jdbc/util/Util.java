@@ -15,8 +15,8 @@ public class Util {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(dbURL, dbUserName, dbPassword);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
         return connection;
     }
