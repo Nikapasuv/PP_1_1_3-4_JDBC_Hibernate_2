@@ -3,24 +3,30 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 
 import java.util.Collections;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
+    Transaction transaction = null;
     public UserDaoHibernateImpl() {
 
     }
 
     @Override
     public void createUsersTable() {
-        String qwery = "CREATE TABLE User (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), lastName VARCHAR(60), age INT )";
+        String query = "CREATE TABLE User (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), lastName VARCHAR(60), age INT )";
+
         try (Session session = Util.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            session.createSQLQuery(qwery)
-                    .executeUpdate();
-            session.getTransaction().commit();
+            transaction = session.beginTransaction();
+            session.createSQLQuery(query).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
         }
     }
@@ -34,6 +40,9 @@ public class UserDaoHibernateImpl implements UserDao {
                     .executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
         }
     }
@@ -46,6 +55,9 @@ public class UserDaoHibernateImpl implements UserDao {
             session.save(new User(name, lastName, age));
             session.getTransaction().commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
         }
     }
@@ -60,6 +72,9 @@ public class UserDaoHibernateImpl implements UserDao {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
         }
     }
@@ -69,6 +84,9 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session session = Util.getSessionFactory().openSession()) {
             return session.createQuery("FROM User", User.class).getResultList();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return Collections.emptyList();
         }
@@ -81,6 +99,9 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery("TRUNCATE TABLE User").executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
 
         }
